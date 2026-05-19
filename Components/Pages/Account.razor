@@ -1,0 +1,64 @@
+@page "/account"
+@rendermode InteractiveServer
+@using System.ComponentModel.DataAnnotations
+@inject NavigationManager NavigationManager
+
+<head>
+    <PageTitle>Account</PageTitle>
+</head>
+
+<div class="accBody">
+    <div class="login-container">
+        <div class="login-header">
+            <h1>Sign In</h1>
+        </div>
+
+        <br />
+
+        <EditForm Model="@loginmodel" OnValidSubmit="@HandleLogin">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <InputText id="email" class="form-control" @bind-Value="loginmodel.Email" />
+                <ValidationMessage For="@(() => loginmodel.Email)" />
+            </div>
+
+            <br />
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <InputText id="password" type="password" class="form-control" @bind-Value="loginmodel.Password" />
+                <ValidationMessage For="@(() => loginmodel.Password)" />
+            </div>
+            
+            <br />
+
+            <button type="submit" class="btn btn-primary">Sign In</button>
+
+            <br />
+
+            <p>Don't have an account? <a href="/register">Register here.</a></p>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private LoginModel loginmodel = new LoginModel();
+
+    private void HandleLogin()
+    {
+        NavigationManager.NavigateTo("/account");
+    }
+
+    public class LoginModel
+    {
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = string.Empty;
+
+        [Required]
+        public string Password { get; set; } = string.Empty;
+    }
+}

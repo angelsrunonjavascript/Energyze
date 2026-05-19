@@ -1,7 +1,22 @@
 ﻿@page "/"
+@rendermode InteractiveServer
+@inject NavigationManager NavigationManager
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<h1 class="description">
+    <br /><br /><br /><br /><br />
+    Ever wanted to track your favourite energy drinks or find new ones? Energise is your answer! Create your very own user profile, explore, review and keep track of your journey of exploring the world of energy drinks.
+</h1>
 
-Welcome to your new app.
+<br /><br />
+
+<button type="button" class="explore-button" @onclick="NavigateToProfile">Get Started!</button>
+
+
+@code {
+    private void NavigateToProfile()
+    {
+        NavigationManager.NavigateTo("/account");
+    }
+}

@@ -1,20 +1,33 @@
 ﻿@inherits LayoutComponentBase
 
+<div class="background">
+</div>
+
 <div class="page">
+
     <div class="sidebar">
         <NavMenu />
     </div>
 
-    <main>
-        <div class="top-row px-3">
-            <button type="button"
-            >Search</button>
-        </div>
+    <div class="darkmode @(isDarkMode ? "dark" : "light")">
 
-        <article class="content px-4">
+        <label class="switch">
+            <input type="checkbox" @bind="isDarkMode" />
+
+            <span class="slider">
+                <span class="icon sun">☀️</span>
+                <span class="icon moon">🌙</span>
+            </span>
+        </label>
+
+    </div>
+
+    <main>
+        <article class="content">
             @Body
         </article>
     </main>
+
 </div>
 
 <div id="blazor-error-ui">
@@ -22,3 +35,7 @@
     <a href="" class="reload">Reload</a>
     <a class="dismiss">🗙</a>
 </div>
+
+@code {
+    private bool isDarkMode;
+}
