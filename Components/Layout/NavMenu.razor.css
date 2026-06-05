@@ -7,8 +7,8 @@
     position: absolute;
     top: 0.5rem;
     right: 1rem;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.55%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") no-repeat center/1.75rem rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(68, 86, 105, 0.24);
+    background: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%2868, 86, 105, 0.78%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") no-repeat center/1.75rem rgba(236, 241, 246, 0.78);
 }
 
 .logo {
@@ -17,12 +17,12 @@
 }
 
 .navbar-toggler:checked {
-    background-color: rgba(255, 255, 255, 0);
+    background-color: rgba(205, 216, 226, 0.9);
 }
 
 .top-row {
     height: 3.5rem;
-    background-color: rgba(255, 255, 255, 0);
+    background-color: transparent;
     
 }
 
@@ -71,7 +71,7 @@
     }
 
     .nav-item ::deep .nav-link {
-        color: #7374767f;
+        color: #34495e;
         background: none;
         border: none;
         border-radius: 4px;
@@ -83,17 +83,40 @@
     }
 
 .nav-item ::deep a.active {
-    background-color: rgba(255,255,255,0.37);
-    color: rgba(128, 206, 255, 0.862);
+    background-color: rgba(0, 119, 200, 0.14);
+    color: #0069ad;
 }
 
 .nav-item ::deep .nav-link:hover {
-    background-color: rgba(255,255,255,0.1);
-    color: rgba(128, 206, 255, 0.862);
+    background-color: rgba(0, 119, 200, 0.10);
+    color: #0069ad;
 }
 
 .nav-scrollable {
     display: none;
+}
+
+[data-theme="dark"] .navbar-toggler {
+    border-color: rgba(198, 214, 230, 0.18);
+    background-color: rgba(42, 53, 65, 0.88);
+}
+
+[data-theme="dark"] .navbar-toggler:checked {
+    background-color: rgba(50, 63, 77, 0.96);
+}
+
+[data-theme="dark"] .nav-item ::deep .nav-link {
+    color: #d6e2ee;
+}
+
+[data-theme="dark"] .nav-item ::deep a.active {
+    background-color: rgba(104, 186, 255, 0.16);
+    color: #8fd0ff;
+}
+
+[data-theme="dark"] .nav-item ::deep .nav-link:hover {
+    background-color: rgba(104, 186, 255, 0.12);
+    color: #8fd0ff;
 }
 
 .navbar-toggler:checked ~ .nav-scrollable {

@@ -16,18 +16,20 @@
 }
 else
 {
+    var user = AppState.CurrentUser;
+
     <div class="profile-container">
 
         <!-- HEADER -->
         <div class="profile-header">
-            <h1>@AppState.CurrentUser.Username</h1>
+            <h1>@user.Username</h1>
         </div>
 
         <!-- MAIN CARD -->
         <div class="profile-card">
 
-            <p><strong>Username:</strong> @AppState.CurrentUser.Username</p>
-            <p><strong>Email:</strong> @AppState.CurrentUser.Email</p>
+            <p><strong>Username:</strong> @user.Username</p>
+            <p><strong>Email:</strong> @user.Email</p>
 
             <div class="divider"></div>
 
@@ -45,9 +47,9 @@ else
                 else
                 {
                     <p>
-                        @(string.IsNullOrWhiteSpace(AppState.CurrentUser.Bio)
+                        @(string.IsNullOrWhiteSpace(user.Bio)
                             ? "No bio yet..."
-                            : AppState.CurrentUser.Bio)
+                            : user.Bio)
                     </p>
 
                     <button class="edit-btn" @onclick="EditBio">Edit bio</button>
@@ -68,7 +70,7 @@ else
                 <div class="drinks-grid">
                     @foreach (var drink in favorites)
                     {
-                        <div class="drink-card">
+                        <div class="drink-card" @onclick="() => OpenDrink(drink.Id)">
                             <img src="@drink.ImageUrl" class="drink-image" />
                             <h4>@drink.Name</h4>
                         </div>
@@ -80,7 +82,23 @@ else
         <!-- RECENT -->
         <div class="profile-section">
             <h3>Recently Viewed</h3>
-            <p class="empty">Nothing here yet.</p>
+
+            @if (recentlyViewed.Count == 0)
+            {
+                <p class="empty">Nothing here yet.</p>
+            }
+            else
+            {
+                <div class="drinks-grid">
+                    @foreach (var drink in recentlyViewed)
+                    {
+                        <div class="drink-card" @onclick="() => OpenDrink(drink.Id)">
+                            <img src="@drink.ImageUrl" class="drink-image" />
+                            <h4>@drink.Name</h4>
+                        </div>
+                    }
+                </div>
+            }
         </div>
 
         <button class="logout-btn" @onclick="Logout">
@@ -92,6 +110,7 @@ else
 
 @code {
     private List<EnergyDrink> favorites = new();
+    private List<EnergyDrink> recentlyViewed = new();
 
     private bool isEditingBio = false;
     private string editedBio = "";
@@ -109,6 +128,14 @@ else
         .Include(f => f.EnergyDrink)
         .Select(f => f.EnergyDrink)
         .ToListAsync();
+
+    recentlyViewed = await Db.RecentViews
+        .Where(view => view.UserId == AppState.CurrentUser.Id)
+        .OrderByDescending(view => view.ViewedAt)
+        .Include(view => view.EnergyDrink)
+        .Take(3)
+        .Select(view => view.EnergyDrink)
+        .ToListAsync();
 }
 
     private void Logout()
@@ -119,7 +146,7 @@ else
 
     private void EditBio()
     {
-        editedBio = AppState.CurrentUser.Bio ?? "";
+        editedBio = AppState.CurrentUser?.Bio ?? "";
         isEditingBio = true;
     }
 
@@ -130,6 +157,11 @@ else
 
     private async Task SaveBio()
     {
+        if (AppState.CurrentUser == null)
+        {
+            return;
+        }
+
         var user = await Db.Users.FindAsync(AppState.CurrentUser.Id);
 
         if (user != null)
@@ -142,5 +174,10 @@ else
         }
 
         isEditingBio = false;
+    }
+
+    private void OpenDrink(int drinkId)
+    {
+        NavigationManager.NavigateTo($"/details/{drinkId}");
     }
 }

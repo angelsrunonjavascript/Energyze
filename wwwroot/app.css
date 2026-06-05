@@ -6,19 +6,26 @@ body[data-theme="light"] {
     --bg: #ffffff;
     --text: #111111;
     --primary: #006bb7;
+    background-image: url('/Images/bgLIGHT.png');
 }
 
 body[data-theme="dark"] {
     --bg: #0f0f0f;
     --text: #eaeaea;
     --primary: #4ea1ff;
+    background-image: url('/Images/bgDARK.png');
 }
 
 body {
     background-color: var(--bg);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
     color: var(--text);
     transition: background-color 0.3s ease, color 0.3s ease;
     font-family: "Segoe UI", sans-serif;
+    min-height: 100vh;
 }
 
 a, .btn-link {

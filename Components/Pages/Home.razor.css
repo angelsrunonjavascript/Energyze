@@ -1,34 +1,68 @@
-.description {
-    color: #434343;
-    font-size: 2em;
-    font-weight: bold;
+.home-hero {
+    width: min(820px, calc(100vw - 48px));
+    margin: 18vh auto 40px;
+    padding: 28px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.64);
+    backdrop-filter: blur(8px);
     text-align: center;
-    margin-left: 5%;
-    margin-right: 20%;
 }
 
+[data-theme="dark"] .home-hero {
+    border-color: rgba(255, 255, 255, 0.10);
+    background: rgba(12, 12, 12, 0.64);
+}
+
+.home-hero h1 {
+    margin: 0 0 12px;
+    font-size: clamp(2.4rem, 7vw, 4.8rem);
+    font-weight: 900;
+}
+
+.home-hero p {
+    max-width: 680px;
+    margin: 0 auto;
+    color: inherit;
+    font-size: 1.25rem;
+    line-height: 1.5;
+    opacity: 0.78;
+}
 
 .explore-button {
+    display: inline-flex;
     align-items: center;
-    background-color: #007bffb9;
+    justify-content: center;
+    min-height: 46px;
+    margin-top: 24px;
+    padding: 10px 22px;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
+    background-color: #0077c8;
     color: white;
     cursor: pointer;
-    display: flex;
-    font-size: 1.5em;
-    justify-content: center;
-    padding: 10px 20px;
-    margin-left: 35%;
+    font-size: 1.05rem;
+    font-weight: 800;
     text-decoration: none;
 }
 
 .explore-button:hover {
-    background-color: #0056b3;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+    background-color: #005f9f;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
 }
 
 .explore-button:active {
-    background-color: #004085;
-    transform: translateY(1px) scale(0.97);
+    transform: translateY(1px) scale(0.98);
+}
+
+@media (max-width: 640px) {
+    .home-hero {
+        width: min(100% - 28px, 560px);
+        margin-top: 96px;
+        padding: 22px;
+    }
+
+    .home-hero p {
+        font-size: 1.05rem;
+    }
 }

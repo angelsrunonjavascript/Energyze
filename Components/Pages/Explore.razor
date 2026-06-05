@@ -9,45 +9,187 @@
 
 <PageTitle>Explore</PageTitle>
 
-<div class="search-container">
-    <input
-        type="text"
-        class="search-bar"
-        placeholder="Search drinks..."
-        @bind="searchTerm"
-        @bind:event="oninput" />
-</div>
-
-<div class="drinks-grid">
-    @foreach (var drink in FilteredDrinks)
-    {
-        <div class="drink-card" @onclick="() => OpenDrink(drink)">
-            <img src="@drink.ImageUrl" class="drink-image" />
-
-            <h4>@drink.Brand</h4>
-            <h4>@drink.Name</h4>
+<div class="explore-page">
+    <div class="explore-header">
+        <div>
+            <h1>Explore Drinks</h1>
+            <p>Search by brand, flavor, or name, then narrow the shelf by flavor notes.</p>
         </div>
+
+        <input
+            type="text"
+            class="search-bar"
+            placeholder="Search drinks..."
+            @bind="searchTerm"
+            @bind:event="oninput" />
+    </div>
+
+    <div class="filter-panel">
+        <div class="filter-group">
+            <label for="flavorFilter">Flavor notes</label>
+            <select id="flavorFilter" class="filter-select" @bind="selectedFlavorNote">
+                @foreach (var option in FlavorNotes)
+                {
+                    <option value="@option.Name">@option.Name</option>
+                }
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="sortFilter">Sort</label>
+            <select id="sortFilter" class="filter-select" @bind="sortMode">
+                <option value="popular">Most clicked</option>
+                <option value="name">Name</option>
+                <option value="rating">Highest rated</option>
+                <option value="caffeine">Most caffeine</option>
+            </select>
+        </div>
+
+        <div class="flavor-chips">
+            @foreach (var option in FlavorNotes)
+            {
+                <button
+                    type="button"
+                    class="flavor-chip @(selectedFlavorNote == option.Name ? "active" : "")"
+                    @onclick="() => SelectFlavorNote(option.Name)">
+                    @option.Name
+                </button>
+            }
+        </div>
+    </div>
+
+    @if (SelectedFlavorDescription is not null)
+    {
+        <p class="flavor-note">@SelectedFlavorDescription</p>
     }
+
+    <div class="results-count">@FilteredDrinks.Count() drink(s) found</div>
+
+    <div class="drinks-grid">
+        @foreach (var drink in FilteredDrinks)
+        {
+            var rating = GetRatingSummary(drink.Id);
+
+            <div class="drink-card" @onclick="() => OpenDrink(drink)">
+                <img src="@drink.ImageUrl" class="drink-image" alt="@($"{drink.Brand} {drink.Name}")" />
+
+                <div class="drink-card-body">
+                    <p class="brand">@drink.Brand</p>
+                    <h2>@drink.Name</h2>
+                    <p class="flavor">@drink.Flavor</p>
+                    <p class="rating">@(rating.Count == 0 ? "No ratings yet" : $"{rating.Average:0.0}/5 ({rating.Count})")</p>
+                    <p class="clicks">@FormatClicks(drink.ClickCount)</p>
+                </div>
+            </div>
+        }
+    </div>
 </div>
 
 @code {
     private List<EnergyDrink> drinks = new();
+    private Dictionary<int, RatingSummary> ratingSummaries = new();
     private string searchTerm = "";
+    private string selectedFlavorNote = "All";
+    private string sortMode = "popular";
+
+    private static readonly List<FlavorNote> FlavorNotes =
+    [
+        new("All", "Every flavor profile on the shelf.", []),
+        new("Berry", "Blueberry, raspberry, strawberry, pomegranate, and other juicy berry blends.", ["berry", "blueberry", "raspberry", "strawberry", "pomegranate"]),
+        new("Citrus", "Orange, lemon, lime, grapefruit, and sharp bright flavors.", ["citrus", "orange", "lemon", "lime", "grapefruit", "sunrise"]),
+        new("Tropical", "Mango, pineapple, passion fruit, coconut, and beachy fruit blends.", ["tropical", "mango", "pineapple", "passion", "coconut"]),
+        new("Cherry", "Cherry-forward drinks and candy-like red fruit notes.", ["cherry"]),
+        new("Grape", "Grape and dark fruit flavors.", ["grape"]),
+        new("Classic", "Original energy drink profiles and less fruit-forward options.", ["classic", "original", "energy"])
+    ];
 
     protected override async Task OnInitializedAsync()
     {
         drinks = await Db.EnergyDrinks.ToListAsync();
+
+        ratingSummaries = await Db.Ratings
+            .GroupBy(r => r.EnergyDrinkId)
+            .Select(group => new RatingSummary
+            {
+                EnergyDrinkId = group.Key,
+                Average = group.Average(r => r.Score),
+                Count = group.Count()
+            })
+            .ToDictionaryAsync(r => r.EnergyDrinkId);
     }
 
     private IEnumerable<EnergyDrink> FilteredDrinks =>
-        drinks.Where(d =>
-            string.IsNullOrWhiteSpace(searchTerm)
-            || d.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
-            || d.Brand.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
-            || d.Flavor.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+        SortDrinks(drinks.Where(MatchesSearch).Where(MatchesFlavorNote));
 
-    void OpenDrink(EnergyDrink drink)
+    private string? SelectedFlavorDescription =>
+        selectedFlavorNote == "All"
+            ? null
+            : FlavorNotes.FirstOrDefault(note => note.Name == selectedFlavorNote)?.Description;
+
+    private bool MatchesSearch(EnergyDrink drink)
     {
+        return string.IsNullOrWhiteSpace(searchTerm)
+            || drink.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+            || drink.Brand.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+            || drink.Flavor.Contains(searchTerm, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private bool MatchesFlavorNote(EnergyDrink drink)
+    {
+        var selected = FlavorNotes.First(note => note.Name == selectedFlavorNote);
+
+        if (selected.Keywords.Count == 0)
+        {
+            return true;
+        }
+
+        return selected.Keywords.Any(keyword =>
+            drink.Flavor.Contains(keyword, StringComparison.OrdinalIgnoreCase)
+            || drink.Name.Contains(keyword, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private IEnumerable<EnergyDrink> SortDrinks(IEnumerable<EnergyDrink> source)
+    {
+        return sortMode switch
+        {
+            "popular" => source.OrderByDescending(drink => drink.ClickCount).ThenBy(drink => drink.Brand).ThenBy(drink => drink.Name),
+            "rating" => source.OrderByDescending(drink => GetRatingSummary(drink.Id).Average).ThenBy(drink => drink.Name),
+            "caffeine" => source.OrderByDescending(drink => drink.CaffeineContent).ThenBy(drink => drink.Name),
+            _ => source.OrderBy(drink => drink.Brand).ThenBy(drink => drink.Name)
+        };
+    }
+
+    private RatingSummary GetRatingSummary(int drinkId)
+    {
+        return ratingSummaries.TryGetValue(drinkId, out var summary)
+            ? summary
+            : new RatingSummary { EnergyDrinkId = drinkId };
+    }
+
+    private void SelectFlavorNote(string flavorNote)
+    {
+        selectedFlavorNote = flavorNote;
+    }
+
+    private static string FormatClicks(int clickCount)
+    {
+        return clickCount == 1 ? "1 click" : $"{clickCount} clicks";
+    }
+
+    async Task OpenDrink(EnergyDrink drink)
+    {
+        drink.ClickCount++;
+        await Db.SaveChangesAsync();
+
         Nav.NavigateTo($"/details/{drink.Id}");
+    }
+
+    private record FlavorNote(string Name, string Description, IReadOnlyList<string> Keywords);
+
+    private class RatingSummary
+    {
+        public int EnergyDrinkId { get; set; }
+        public double Average { get; set; }
+        public int Count { get; set; }
     }
 }

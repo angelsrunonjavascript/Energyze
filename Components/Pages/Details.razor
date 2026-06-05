@@ -1,10 +1,13 @@
 @page "/details/{Id:int}"
 
+@using Microsoft.EntityFrameworkCore
 @using WebsiteProject.Data
 @using WebsiteProject.Models
-@using Microsoft.EntityFrameworkCore
+@using WebsiteProject.Services
 
 @inject AppDbContext Db
+@inject AppState AppState
+@inject NavigationManager Nav
 
 <PageTitle>Drink Details</PageTitle>
 
@@ -15,14 +18,17 @@
 else
 {
     <div class="details-container">
-
         <div class="image-section">
-            <img src="@drink.ImageUrl" class="drink-image" />
+            <img src="@drink.ImageUrl" class="drink-image" alt="@($"{drink.Brand} {drink.Name}")" />
         </div>
 
         <div class="info-section">
-
             <h1>@drink.Brand @drink.Name</h1>
+
+            <div class="rating-summary">
+                <strong>@(ratingCount == 0 ? "No ratings yet" : $"{averageRating:0.0}/5")</strong>
+                <span>@(ratingCount == 1 ? "1 rating" : $"{ratingCount} ratings")</span>
+            </div>
 
             <p class="flavor">
                 <strong>Flavor:</strong> @drink.Flavor
@@ -42,10 +48,39 @@ else
                 <p>@drink.Ingredients</p>
             </div>
 
-            <button class="favorite-btn" @onclick="ToggleFavorite" disabled="@isBusy">
-                @(isFavorite ? "★ Remove Favorite" : "☆ Add to Favorites")
-            </button>
+            <div class="rating-panel">
+                <h3>Your rating</h3>
 
+                @if (currentUser == null)
+                {
+                    <p class="signin-note">Sign in to rate this drink or save it to your favorites.</p>
+                    <button class="secondary-btn" @onclick="GoToSignIn">Sign in</button>
+                }
+                else
+                {
+                    <div class="rating-buttons" aria-label="Choose a rating">
+                        @for (var score = 1; score <= 5; score++)
+                        {
+                            var ratingScore = score;
+                            <button
+                                type="button"
+                                class="rating-btn @(userRating >= ratingScore ? "selected" : "")"
+                                disabled="@isBusy"
+                                @onclick="() => SetRating(ratingScore)">
+                                @ratingScore
+                            </button>
+                        }
+                    </div>
+
+                    <p class="rating-help">
+                        @(userRating == 0 ? "Pick a score from 1 to 5." : $"You rated this {userRating}/5.")
+                    </p>
+                }
+            </div>
+
+            <button class="favorite-btn" @onclick="ToggleFavorite" disabled="@(isBusy || currentUser == null)">
+                @(isFavorite ? "Remove favorite" : "Add to favorites")
+            </button>
         </div>
     </div>
 }
@@ -59,25 +94,39 @@ else
 
     private bool isFavorite;
     private bool isBusy;
+    private int userRating;
+    private double averageRating;
+    private int ratingCount;
 
     protected override async Task OnInitializedAsync()
     {
         drink = await Db.EnergyDrinks
             .FirstOrDefaultAsync(d => d.Id == Id);
 
-        currentUser = await Db.Users.FirstOrDefaultAsync();
+        currentUser = AppState.CurrentUser;
 
         if (currentUser != null)
         {
             isFavorite = await Db.Favorites
                 .AnyAsync(f => f.UserId == currentUser.Id && f.EnergyDrinkId == Id);
+
+            userRating = await Db.Ratings
+                .Where(r => r.UserId == currentUser.Id && r.EnergyDrinkId == Id)
+                .Select(r => r.Score)
+                .FirstOrDefaultAsync();
+
+            await RecordRecentView();
         }
+
+        await LoadRatingSummary();
     }
 
     private async Task ToggleFavorite()
     {
         if (isBusy || currentUser == null || drink == null)
+        {
             return;
+        }
 
         isBusy = true;
 
@@ -104,7 +153,86 @@ else
 
         await Db.SaveChangesAsync();
         isBusy = false;
+    }
 
-        await InvokeAsync(StateHasChanged);
+    private async Task SetRating(int score)
+    {
+        if (isBusy || currentUser == null || drink == null)
+        {
+            return;
+        }
+
+        isBusy = true;
+
+        var existing = await Db.Ratings
+            .FirstOrDefaultAsync(r =>
+                r.UserId == currentUser.Id &&
+                r.EnergyDrinkId == drink.Id);
+
+        if (existing == null)
+        {
+            Db.Ratings.Add(new Rating
+            {
+                UserId = currentUser.Id,
+                EnergyDrinkId = drink.Id,
+                Score = score
+            });
+        }
+        else
+        {
+            existing.Score = score;
+        }
+
+        userRating = score;
+
+        await Db.SaveChangesAsync();
+        await LoadRatingSummary();
+
+        isBusy = false;
+    }
+
+    private async Task LoadRatingSummary()
+    {
+        var ratings = await Db.Ratings
+            .Where(r => r.EnergyDrinkId == Id)
+            .Select(r => r.Score)
+            .ToListAsync();
+
+        ratingCount = ratings.Count;
+        averageRating = ratingCount == 0 ? 0 : ratings.Average();
+    }
+
+    private async Task RecordRecentView()
+    {
+        if (currentUser == null || drink == null)
+        {
+            return;
+        }
+
+        var existing = await Db.RecentViews
+            .FirstOrDefaultAsync(view =>
+                view.UserId == currentUser.Id &&
+                view.EnergyDrinkId == drink.Id);
+
+        if (existing == null)
+        {
+            Db.RecentViews.Add(new RecentView
+            {
+                UserId = currentUser.Id,
+                EnergyDrinkId = drink.Id,
+                ViewedAt = DateTime.UtcNow
+            });
+        }
+        else
+        {
+            existing.ViewedAt = DateTime.UtcNow;
+        }
+
+        await Db.SaveChangesAsync();
+    }
+
+    private void GoToSignIn()
+    {
+        Nav.NavigateTo("/signin");
     }
 }

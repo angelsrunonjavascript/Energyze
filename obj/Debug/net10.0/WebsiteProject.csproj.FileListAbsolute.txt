@@ -146,7 +146,6 @@ C:\Users\Evelyn\Website-Project-Wip\obj\Debug\net10.0\scopedcss\Components\Pages
 C:\Users\Evelyn\Website-Project-Wip\obj\Debug\net10.0\scopedcss\Components\Pages\Register.razor.rz.scp.css
 C:\Users\Evelyn\Website-Project-Wip\obj\Debug\net10.0\scopedcss\bundle\WebsiteProject.styles.css
 C:\Users\Evelyn\Website-Project-Wip\obj\Debug\net10.0\scopedcss\projectbundle\WebsiteProject.bundle.scp.css
-C:\Users\Evelyn\Website-Project-Wip\obj\Debug\net10.0\compressed\e11djk12yp-{0}-ua1twbkzp7-ua1twbkzp7.gz
 C:\Users\Evelyn\Website-Project-Wip\obj\Debug\net10.0\compressed\0uceldnrxt-{0}-6gzpyzhau4-6gzpyzhau4.gz
 C:\Users\Evelyn\Website-Project-Wip\obj\Debug\net10.0\compressed\v3yr6aqugn-{0}-8inm30yfxf-8inm30yfxf.gz
 C:\Users\Evelyn\Website-Project-Wip\obj\Debug\net10.0\compressed\us6jgli3dg-{0}-ej96puwv3k-ej96puwv3k.gz
@@ -162,5 +161,6 @@ C:\Users\Evelyn\Website-Project-Wip\obj\Debug\net10.0\refint\WebsiteProject.dll
 C:\Users\Evelyn\Website-Project-Wip\obj\Debug\net10.0\WebsiteProject.pdb
 C:\Users\Evelyn\Website-Project-Wip\obj\Debug\net10.0\WebsiteProject.genruntimeconfig.cache
 C:\Users\Evelyn\Website-Project-Wip\obj\Debug\net10.0\ref\WebsiteProject.dll
-C:\Users\Evelyn\Website-Project-Wip\obj\Debug\net10.0\compressed\5fcevwxkvz-{0}-wrv14o2of8-wrv14o2of8.gz
-C:\Users\Evelyn\Website-Project-Wip\obj\Debug\net10.0\compressed\x7i4lt0up0-{0}-wrv14o2of8-wrv14o2of8.gz
+C:\Users\Evelyn\Website-Project-Wip\obj\Debug\net10.0\compressed\e11djk12yp-{0}-4xrdwazajq-4xrdwazajq.gz
+C:\Users\Evelyn\Website-Project-Wip\obj\Debug\net10.0\compressed\5fcevwxkvz-{0}-zefr87xgu1-zefr87xgu1.gz
+C:\Users\Evelyn\Website-Project-Wip\obj\Debug\net10.0\compressed\x7i4lt0up0-{0}-zefr87xgu1-zefr87xgu1.gz
