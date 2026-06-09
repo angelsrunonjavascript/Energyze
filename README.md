@@ -8,7 +8,7 @@ view detailed information, rate products, save favorites, and search for new dri
 - browse a database of energy drinks
 - search and filter by brand and flavor
 - rate energy drinks
-- vuew detailed information about each drink
+- view detailed information about each drink
 - track popular porducts through view counts
 - add/remove from favorite
 - view your recent activity via recently viewed section
